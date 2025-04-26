@@ -1,0 +1,5 @@
+npm create vite@latest
+cd frontend
+npm install
+npm install tailwindcss @tailwindcss/vite
+
