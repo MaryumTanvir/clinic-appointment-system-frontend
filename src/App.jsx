@@ -1,17 +1,20 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/admin/Dashboard";
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import AppRoutes from './routes/index';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Admin Dashboard Route */}
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        
-        {/* Other routes you will add later here */}
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-100">
+          <main>
+            <AppRoutes />
+          </main>
+        </div>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
 export default App;
+

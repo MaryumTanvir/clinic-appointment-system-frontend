@@ -1,1 +1,36 @@
+<<<<<<< HEAD
 @import "tailwindcss";
+=======
+/* Import Ant Design styles */
+@import 'antd/dist/reset.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom styles to replicate old CSS */
+.form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  background-color: #a4d6ed; /* Main color */
+}
+
+.register-form {
+  padding: 24px; /* Increased from 5px for better aesthetics */
+  border: solid 2px #091840; /* Accent color */
+  width: 30%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logo { height: 100px; width: auto; }
+>>>>>>> 49411cccacc26cf6f3250ff8d9c8da008c12beb0
