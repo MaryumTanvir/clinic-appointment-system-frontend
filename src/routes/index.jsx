@@ -4,6 +4,10 @@ import Signup from '../pages/auth/Signup';
 import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/admin/Dashboard'; // Import your Dashboard
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
+import PatientDashboard from '../pages/patient/Dashboard';
+import PatientAppointments from '../pages/patient/Appointments';
+import PatientDoctors from '../pages/patient/Doctors';
+import PatientPayments from '../pages/patient/Payments';
 import Feedback from '../pages/doctor/Feedback';
 import Shifts from '../pages/doctor/Shifts';
 import Profile from '../pages/doctor/Profile'; 
@@ -25,13 +29,14 @@ function AppRoutes() {
             ) : user.role === 'doctor' ? (
               <Navigate to="/doctor/dashboard" replace />
             ) : (
-              <Navigate to={`/${user.role}/home`} replace />
+              <Navigate to={`/${user.role}/dashboard`} replace />
             )
           ) : (
             <Navigate to="/login" replace />
           )
         }
       />
+
 
       {/* Login & Signup */}
       <Route path="/login" element={<Login />} />
@@ -42,6 +47,14 @@ function AppRoutes() {
 
       {/* Doctor Routes */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+
+      {/* Patient Dashboard */}
+      <Route path="/patient/dashboard" element={<PatientDashboard />} />
+      <Route path="/patient/appointments" element={<PatientAppointments />} />
+      <Route path="/patient/doctors" element={<PatientDoctors />} />
+      <Route path="/patient/payments" element={<PatientPayments />} />
+          
+      {/* Doctor Feedback */}
       <Route path="/doctor/feedback" element={<Feedback />} />
       <Route path="/doctor/shifts" element={<Shifts />} />
       <Route path="/doctor/profile" element={<Profile />} />

@@ -1,72 +1,328 @@
-import React, { useState } from 'react';
-import { useAppointments } from '../../hooks/useAppointments';
-import AppointmentCard from '../../components/patient/AppointmentCard';
-import { Appointment } from '../../types/appointment';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Table, Button, message, Modal, DatePicker, Select, Form } from 'antd';
+import { Calendar } from 'lucide-react';
+import Layout from '../../components/patient/Layout';
+import moment from 'moment';
 
-const Appointments: React.FC = () => {
-  const [timeFilter, setTimeFilter] = useState<'past' | 'today' | 'future'>('future');
-  const { data, isLoading, error, refetch } = useAppointments(timeFilter);
+const { Option } = Select;
+
+const Appointments = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState(''); // '' for all, 'past', 'today', 'future'
+  const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [availableTimes, setAvailableTimes] = useState([]);
+  const [form] = Form.useForm();
+
+  const fetchAppointments = async (timeFilter = '') => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/patients/appointments', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: { time: timeFilter }
+      });
+      console.log('Appointments response:', response.data);
+      if (response.data.success) {
+        setAppointments(response.data.data);
+      } else {
+        message.error(response.data.message || 'Failed to load appointments');
+      }
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error.response?.data || error);
+      message.error(error.response?.data?.message || 'Failed to load appointments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDoctorAvailability = async (doctorId, selectedDate) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/patients/doctors/${doctorId}/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log('Doctor profile response:', response.data);
+      if (response.data.success) {
+        const availability = response.data.data.availability || [];
+        // Filter available times for the selected date
+        const selectedDateStr = moment(selectedDate).format('YYYY-MM-DD');
+        const times = availability
+          .filter((slot) => {
+            const slotDate = moment(slot.date).format('YYYY-MM-DD');
+            return slotDate === selectedDateStr && slot.available;
+          })
+          .map((slot) => slot.time);
+        setAvailableTimes(times);
+      } else {
+        message.error(response.data.message || 'Failed to load doctor availability');
+        setAvailableTimes([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch doctor availability:', error.response?.data || error);
+      message.error(error.response?.data?.message || 'Failed to load doctor availability');
+      setAvailableTimes([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments(filter);
+  }, [filter]);
+
+  const handleCancelAppointment = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(
+        `http://localhost:5000/api/patients/appointments/${appointmentId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log('Cancel response:', response.data);
+      if (response.data.success) {
+        message.success(response.data.message);
+        fetchAppointments(filter); // Refresh appointments
+      } else {
+        message.error(response.data.message || 'Failed to cancel appointment');
+      }
+    } catch (error) {
+      console.error('Cancel appointment error:', error.response?.data || error);
+      message.error(error.response?.data?.message || 'Failed to cancel appointment');
+    }
+  };
+
+  const handleRescheduleAppointment = async (values) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(
+        `http://localhost:5000/api/patients/appointments/${selectedAppointment._id}/reschedule`,
+        {
+          date: values.date.format('YYYY-MM-DD'),
+          time: values.time,
+          notes: values.notes
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log('Reschedule response:', response.data);
+      if (response.data.success) {
+        message.success(response.data.message);
+        setRescheduleModalVisible(false);
+        form.resetFields();
+        fetchAppointments(filter); // Refresh appointments
+      } else {
+        message.error(response.data.message || 'Failed to reschedule appointment');
+      }
+    } catch (error) {
+      console.error('Reschedule appointment error:', error.response?.data || error);
+      message.error(error.response?.data?.message || 'Failed to reschedule appointment');
+    }
+  };
+
+  const openRescheduleModal = (appointment) => {
+    setSelectedAppointment(appointment);
+    setRescheduleModalVisible(true);
+    setAvailableTimes([]); // Reset times
+    form.setFieldsValue({
+      date: null,
+      time: null,
+      notes: appointment.notes || ''
+    });
+  };
+
+  const handleDateChange = (date) => {
+    if (date && selectedAppointment) {
+      fetchDoctorAvailability(selectedAppointment.doctorId._id, date);
+    } else {
+      setAvailableTimes([]);
+    }
+  };
+
+  const isCancelEligible = (appointment) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return (
+      ['scheduled', 'rescheduled'].includes(appointment.status) &&
+      new Date(appointment.date) >= today
+    );
+  };
+
+  const isRescheduleEligible = (appointment) => {
+    return ['scheduled', 'rescheduled'].includes(appointment.status);
+  };
+
+  const columns = [
+    {
+      title: 'Doctor',
+      dataIndex: 'doctorId',
+      key: 'doctor',
+      render: (doctor) => `${doctor.firstName} ${doctor.lastName}`
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date) => new Date(date).toISOString().split('T')[0]
+    },
+    {
+      title: 'Time',
+      dataIndex: 'time',
+      key: 'time'
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => status.charAt(0).toUpperCase() + status.slice(1)
+    },
+    {
+      title: 'Notes',
+      dataIndex: 'notes',
+      key: 'notes',
+      render: (notes) => notes || 'No notes'
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <div className="flex gap-2">
+          <Button
+            type="primary"
+            danger
+            onClick={() => handleCancelAppointment(record._id)}
+            disabled={!isCancelEligible(record)}
+            className="bg-red-600 disabled:bg-gray-300"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => openRescheduleModal(record)}
+            disabled={!isRescheduleEligible(record)}
+            className="bg-[#4A628A] disabled:bg-gray-300"
+          >
+            Reschedule
+          </Button>
+        </div>
+      )
+    }
+  ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-primary mb-6">My Appointments</h1>
-      <div className="mb-6 flex space-x-4">
-        <button
-          onClick={() => setTimeFilter('past')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            timeFilter === 'past'
-              ? 'bg-primary text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Past
-        </button>
-        <button
-          onClick={() => setTimeFilter('today')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            timeFilter === 'today'
-              ? 'bg-primary text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Today
-        </button>
-        <button
-          onClick={() => setTimeFilter('future')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            timeFilter === 'future'
-              ? 'bg-primary text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Future
-        </button>
+    <Layout role="patient">
+      <div className="mb-12">
+        <h1 className="text-4xl pt-2.5 font-bold flex items-center">
+          <Calendar size={32} className="mr-2 text-[#4A628A]" />
+          My Appointments
+        </h1>
+        <p className="text-gray-600 text-lg">View and filter your appointments</p>
       </div>
-      {isLoading && (
-        <p className="text-center text-gray-500">Loading appointments...</p>
-      )}
-      {error && (
-        <p className="text-center text-red-500">
-          Error: {error.message || 'Failed to load appointments'}
-        </p>
-      )}
-      {data && data.data.length === 0 && (
-        <p className="text-center text-gray-500">
-          No {timeFilter} appointments found.
-        </p>
-      )}
-      {data && data.data.length > 0 && (
-        <div className="grid gap-4">
-          {data.data.map((appointment: Appointment) => (
-            <AppointmentCard
-              key={appointment._id}
-              appointment={appointment}
-              onUpdate={refetch} // Refresh appointments after cancel/reschedule
-            />
-          ))}
+
+      <div className="bg-[#B9E5E8] rounded-xl p-6">
+        <div className="flex gap-4 mb-6">
+          <Button
+            type={filter === '' ? 'primary' : 'default'}
+            onClick={() => setFilter('')}
+            className={filter === '' ? 'bg-[#4A628A] text-white border-none' : ''}
+          >
+            All
+          </Button>
+          <Button
+            type={filter === 'past' ? 'primary' : 'default'}
+            onClick={() => setFilter('past')}
+            className={filter === 'past' ? 'bg-[#4A628A] text-white border-none' : ''}
+          >
+            Past
+          </Button>
+          <Button
+            type={filter === 'today' ? 'primary' : 'default'}
+            onClick={() => setFilter('today')}
+            className={filter === 'today' ? 'bg-[#4A628A] text-white border-none' : ''}
+          >
+            Today
+          </Button>
+          <Button
+            type={filter === 'future' ? 'primary' : 'default'}
+            onClick={() => setFilter('future')}
+            className={filter === 'future' ? 'bg-[#4A628A] text-white border-none' : ''}
+          >
+            Future
+          </Button>
         </div>
-      )}
-    </div>
+
+        <Table
+          columns={columns}
+          dataSource={appointments}
+          rowKey="_id"
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+          className="bg-white rounded-lg"
+        />
+
+        <Modal
+          title="Reschedule Appointment"
+          visible={rescheduleModalVisible}
+          onCancel={() => {
+            setRescheduleModalVisible(false);
+            form.resetFields();
+            setAvailableTimes([]);
+          }}
+          footer={null}
+          className="reschedule-modal"
+        >
+          <Form
+            form={form}
+            onFinish={handleRescheduleAppointment}
+            layout="vertical"
+            className="p-4"
+          >
+            <Form.Item
+              name="date"
+              label="Date"
+              rules={[{ required: true, message: 'Please select a date' }]}
+            >
+              <DatePicker
+                format="YYYY-MM-DD"
+                disabledDate={(current) => current && current < moment().startOf('day')}
+                onChange={handleDateChange}
+                className="w-full"
+              />
+            </Form.Item>
+            <Form.Item
+              name="time"
+              label="Time"
+              rules={[{ required: true, message: 'Please select a time' }]}
+            >
+              <Select
+                placeholder="Select time"
+                className="w-full"
+                disabled={availableTimes.length === 0}
+                notFoundContent={availableTimes.length === 0 ? 'No available times for selected date' : null}
+              >
+                {availableTimes.map((time) => (
+                  <Option key={time} value={time}>{time}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="notes"
+              label="Notes (Optional)"
+            >
+              <textarea className="w-full p-2 border border-[#091840] rounded" rows={4} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="bg-[#4A628A] w-full">
+                Reschedule
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
+    </Layout>
   );
 };
 
