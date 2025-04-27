@@ -28,7 +28,7 @@ function Login() {
           navigate('/', { replace: true }); // Handle other roles later
         }
         else if(response.data.user.role === 'doctor') {
-            navigate('/', { replace: true }); // Handle other roles later
+            navigate('/doctor/dashboard', { replace: true }); // Handle other roles later
         }
         else{
             navigate('/', { replace: true });

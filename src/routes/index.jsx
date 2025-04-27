@@ -4,6 +4,7 @@ import Signup from '../pages/auth/Signup';
 import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/admin/Dashboard'; // Import your Dashboard
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
+import Feedback from '../pages/doctor/Feedback';
 import { useAuth } from '../hooks/useAuth';
 
 function AppRoutes() {
@@ -37,6 +38,9 @@ function AppRoutes() {
 
       {/* Doctor Dashboard */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+
+      {/* Doctor Feedback */}
+      <Route path="/doctor/feedback" element={<Feedback />} />
 
       {/* Catch All */}
       <Route path="*" element={<NotFound />} />
