@@ -5,6 +5,8 @@ import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/admin/Dashboard'; // Import your Dashboard
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
 import Feedback from '../pages/doctor/Feedback';
+import Shifts from '../pages/doctor/Shifts';
+import Profile from '../pages/doctor/Profile'; 
 import { useAuth } from '../hooks/useAuth';
 
 function AppRoutes() {
@@ -20,6 +22,8 @@ function AppRoutes() {
           token && user ? (
             user.role === 'admin' ? (
               <Navigate to="/admin/dashboard" replace />
+            ) : user.role === 'doctor' ? (
+              <Navigate to="/doctor/dashboard" replace />
             ) : (
               <Navigate to={`/${user.role}/home`} replace />
             )
@@ -36,11 +40,11 @@ function AppRoutes() {
       {/* Admin Dashboard */}
       <Route path="/admin/dashboard" element={<Dashboard />} />
 
-      {/* Doctor Dashboard */}
+      {/* Doctor Routes */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-
-      {/* Doctor Feedback */}
       <Route path="/doctor/feedback" element={<Feedback />} />
+      <Route path="/doctor/shifts" element={<Shifts />} />
+      <Route path="/doctor/profile" element={<Profile />} />
 
       {/* Catch All */}
       <Route path="*" element={<NotFound />} />
