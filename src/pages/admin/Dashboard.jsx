@@ -31,7 +31,7 @@ const Dashboard = () => {
         <h1 className="text-4xl pt-2.5 font-bold">
           Hello, {admin ? `${admin.firstName} ${admin.lastName}` : '...'}
         </h1>
-        <p className="text-gray-600 text-lg">Welcome to the management system!</p>
+        <p className="text-gray-600 text-lg">Welcome to the appointment management system!</p>
       </div>
 
       {/* My Information Card */}
@@ -68,7 +68,7 @@ const Dashboard = () => {
             </div>
             <h2 className="text-3xl font-bold">Approval Requests</h2>
           </div>
-          <p className="text-2xl">100 doctor requests</p>
+          <p className="text-2xl">100 doctor approval requests</p>
         </div>
 
         {/* Total Doctors Card */}
@@ -81,7 +81,7 @@ const Dashboard = () => {
             </div>
             <h2 className="text-3xl font-bold">Total Doctors</h2>
           </div>
-          <p className="text-2xl">100 doctors in<br />the system</p>
+          <p className="text-2xl">100 doctors in the system</p>
         </div>
       </div>
     </Layout>

@@ -6,7 +6,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-100">
+        <div>
           <main>
             <AppRoutes />
           </main>
