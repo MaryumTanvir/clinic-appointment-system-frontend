@@ -25,7 +25,7 @@ function Login() {
         if (response.data.user.role === 'patient') {
           navigate('/patient/appointments', { replace: true });
         } else if(response.data.user.role === 'admin') {
-          navigate('/', { replace: true }); // Handle other roles later
+          navigate('/admin/dashboard', { replace: true }); // Handle other roles later
         }
         else if(response.data.user.role === 'doctor') {
             navigate('/', { replace: true }); // Handle other roles later
