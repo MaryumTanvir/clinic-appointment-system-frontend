@@ -1,5 +1,6 @@
 /* Import Ant Design styles */
 @import 'antd/dist/reset.css';
+
 @import "tailwindcss";
 @tailwind base;
 @tailwind components;
@@ -32,7 +33,12 @@ html, body, #root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.logo {
+.logo{
+  display: flex;
+  justify-content: center;
+}
+
+.logo-img {
   height: 100px;
   width: auto;
 }
@@ -55,3 +61,4 @@ html, body, #root {
   border-color: #091840 !important;
   box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
 }
+
