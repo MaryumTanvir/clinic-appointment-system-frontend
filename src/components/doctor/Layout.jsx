@@ -1,15 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { Home, ClipboardList, Calendar, Settings, LogOut, FileText } from 'lucide-react';
 import logo from '../../assets/images/logo.png';
 
 const Layout = ({ children }) => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Clear the token
-    localStorage.removeItem('role'); // Clear the role if stored
-    navigate('/login'); // Redirect to login page
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    navigate('/login');
   };
 
   return (
@@ -30,7 +30,7 @@ const Layout = ({ children }) => {
           <NavItem icon={<ClipboardList size={20} />} label="Appointments" onClick={() => navigate('/doctor/appointments')} />
           <NavItem icon={<Calendar size={20} />} label="Shift Schedule" onClick={() => navigate('/doctor/shifts')} />
           <NavItem icon={<FileText size={20} />} label="Feedback" onClick={() => navigate('/doctor/feedback')} />
-          <NavItem icon={<Settings size={20} />} label="Settings" onClick={() => navigate('/doctor/settings')} />
+          <NavItem icon={<Settings size={20} />} label="Settings" onClick={() => navigate('/doctor/profile')} />
         </nav>
 
         {/* Logout */}

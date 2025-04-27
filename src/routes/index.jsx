@@ -12,6 +12,8 @@ import PatientFeedback from '../pages/patient/Feedback';
 import PatientProfile from '../pages/patient/Profile.jsx';
 
 import Feedback from '../pages/doctor/Feedback';
+import Shifts from '../pages/doctor/Shifts';
+import Profile from '../pages/doctor/Profile'; 
 import { useAuth } from '../hooks/useAuth';
 
 function AppRoutes() {
@@ -27,6 +29,8 @@ function AppRoutes() {
           token && user ? (
             user.role === 'admin' ? (
               <Navigate to="/admin/dashboard" replace />
+            ) : user.role === 'doctor' ? (
+              <Navigate to="/doctor/dashboard" replace />
             ) : (
               <Navigate to={`/${user.role}/dashboard`} replace />
             )
@@ -44,7 +48,7 @@ function AppRoutes() {
       {/* Admin Dashboard */}
       <Route path="/admin/dashboard" element={<Dashboard />} />
 
-      {/* Doctor Dashboard */}
+      {/* Doctor Routes */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
 
       {/* Patient Dashboard */}
@@ -57,6 +61,8 @@ function AppRoutes() {
           
       {/* Doctor Feedback */}
       <Route path="/doctor/feedback" element={<Feedback />} />
+      <Route path="/doctor/shifts" element={<Shifts />} />
+      <Route path="/doctor/profile" element={<Profile />} />
 
       {/* Catch All */}
       <Route path="*" element={<NotFound />} />
