@@ -23,7 +23,7 @@ function Login() {
         message.success('Login successful!');
         // Redirect based on user role
         if (response.data.user.role === 'patient') {
-          navigate('/patient/appointments', { replace: true });
+          navigate('/', { replace: true });
         } else if(response.data.user.role === 'admin') {
           navigate('/', { replace: true }); // Handle other roles later
         }
