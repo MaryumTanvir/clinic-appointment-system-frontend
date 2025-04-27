@@ -11,6 +11,7 @@ import PatientPayments from '../pages/patient/Payments';
 import Feedback from '../pages/doctor/Feedback';
 import Shifts from '../pages/doctor/Shifts';
 import Profile from '../pages/doctor/Profile'; 
+import Appointments from '../pages/doctor/Appointments';
 import { useAuth } from '../hooks/useAuth';
 
 function AppRoutes() {
@@ -47,17 +48,16 @@ function AppRoutes() {
 
       {/* Doctor Routes */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+      <Route path="/doctor/appointments" element={<Appointments />} />
+      <Route path="/doctor/feedback" element={<Feedback />} />
+      <Route path="/doctor/shifts" element={<Shifts />} />
+      <Route path="/doctor/profile" element={<Profile />} />
 
       {/* Patient Dashboard */}
       <Route path="/patient/dashboard" element={<PatientDashboard />} />
       <Route path="/patient/appointments" element={<PatientAppointments />} />
       <Route path="/patient/doctors" element={<PatientDoctors />} />
       <Route path="/patient/payments" element={<PatientPayments />} />
-          
-      {/* Doctor Feedback */}
-      <Route path="/doctor/feedback" element={<Feedback />} />
-      <Route path="/doctor/shifts" element={<Shifts />} />
-      <Route path="/doctor/profile" element={<Profile />} />
 
       {/* Catch All */}
       <Route path="*" element={<NotFound />} />
