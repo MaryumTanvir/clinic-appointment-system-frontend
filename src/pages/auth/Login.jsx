@@ -47,8 +47,8 @@ function Login() {
   return (
     <div className="form-container">
       <div className="register-form">
-        <div className="flex justify-center mb-6">
-          <img src={logo} alt="Clinic Appointment System" className="logo" />
+        <div className="logo">
+          <img src={logo} alt="Clinic Appointment System" className="logo-img" />
         </div>
         <h3 className="text-2xl font-bold text-accent text-center mb-6">Login</h3>
         <Form
