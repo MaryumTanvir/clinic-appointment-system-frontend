@@ -4,6 +4,13 @@ import Signup from '../pages/auth/Signup';
 import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/admin/Dashboard'; // Import your Dashboard
 import { useAuth } from '../hooks/useAuth';
+import ManageDoctors from '../pages/admin/ManageDoctors'; // <<< Import it at the top
+import DoctorRequests from '../pages/admin/DoctorRequests';
+import Shifts from '../pages/admin/Shifts';
+import Settings from '../pages/admin/Settings';
+
+
+
 
 function AppRoutes() {
   const { user, token } = useAuth();
@@ -11,7 +18,7 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Root Route */}
+      {/* Root / - Decide where to send */}
       <Route
         path="/"
         element={
@@ -27,14 +34,20 @@ function AppRoutes() {
         }
       />
 
-      {/* Login & Signup */}
+      {/* Auth Pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* Admin Dashboard */}
+      {/* Admin Pages */}
       <Route path="/admin/dashboard" element={<Dashboard />} />
+     
+      <Route path="/admin/manage-doctors" element={<ManageDoctors />} />
+      <Route path ="admin/doctor-requests" element ={<DoctorRequests/>} />
+      <Route path ="admin/shifts" element ={<Shifts/>} />
+      <Route path ="admin/settings" element ={<Settings/>} />
+     
 
-      {/* Catch All */}
+      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
