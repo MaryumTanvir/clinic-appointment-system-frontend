@@ -4,10 +4,14 @@ import Signup from '../pages/auth/Signup';
 import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/admin/Dashboard'; // Import your Dashboard
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
+<<<<<<< HEAD
 import PatientDashboard from '../pages/patient/Dashboard';
 import PatientAppointments from '../pages/patient/Appointments';
 import PatientDoctors from '../pages/patient/Doctors';
 import PatientPayments from '../pages/patient/Payments';
+=======
+import Feedback from '../pages/doctor/Feedback';
+>>>>>>> e25d370aa12a56ca487c016ee4fa6914b41fc74f
 import { useAuth } from '../hooks/useAuth';
 
 function AppRoutes() {
@@ -43,12 +47,18 @@ function AppRoutes() {
       {/* Doctor Dashboard */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
 
+<<<<<<< HEAD
       {/* Patient Dashboard */}
       <Route path="/patient/dashboard" element={<PatientDashboard />} />
       <Route path="/patient/appointments" element={<PatientAppointments />} />
       <Route path="/patient/doctors" element={<PatientDoctors />} />
       <Route path="/patient/payments" element={<PatientPayments />} />
           
+=======
+      {/* Doctor Feedback */}
+      <Route path="/doctor/feedback" element={<Feedback />} />
+
+>>>>>>> e25d370aa12a56ca487c016ee4fa6914b41fc74f
       {/* Catch All */}
       <Route path="*" element={<NotFound />} />
     </Routes>

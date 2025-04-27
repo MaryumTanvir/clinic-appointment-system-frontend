@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { Home, Users, Calendar, Settings, LogOut, FileText } from 'lucide-react';
+import { Home, ClipboardList, Calendar, Settings, LogOut, FileText } from 'lucide-react';
 import logo from '../../assets/images/logo.png';
 
 const Layout = ({ children }) => {
@@ -26,11 +26,11 @@ const Layout = ({ children }) => {
 
         {/* Navigation */}
         <nav className="flex-1 flex flex-col gap-4">
-          <NavItem icon={<Home size={20} />} label="Dashboard" active />
-          <NavItem icon={<Users size={20} />} label="Manage Doctors" />
-          <NavItem icon={<FileText size={20} />} label="Doctor Requests" />
-          <NavItem icon={<Calendar size={20} />} label="Shifts" />
-          <NavItem icon={<Settings size={20} />} label="Settings" />
+          <NavItem icon={<Home size={20} />} label="Dashboard" onClick={() => navigate('/doctor/dashboard')} />
+          <NavItem icon={<ClipboardList size={20} />} label="Appointments" onClick={() => navigate('/doctor/appointments')} />
+          <NavItem icon={<Calendar size={20} />} label="Shift Schedule" onClick={() => navigate('/doctor/shifts')} />
+          <NavItem icon={<FileText size={20} />} label="Feedback" onClick={() => navigate('/doctor/feedback')} />
+          <NavItem icon={<Settings size={20} />} label="Settings" onClick={() => navigate('/doctor/settings')} />
         </nav>
 
         {/* Logout */}
@@ -48,9 +48,12 @@ const Layout = ({ children }) => {
 };
 
 // Navigation Item Component
-const NavItem = ({ icon, label, active }) => {
+const NavItem = ({ icon, label, onClick }) => {
   return (
-    <div className={`flex items-center p-3 rounded-lg ${active ? 'bg-[#7AB2D3] bg-opacity-30' : 'hover:bg-[#7AB2D3] hover:bg-opacity-20'} cursor-pointer transition-all`}>
+    <div
+      className="flex items-center p-3 rounded-lg hover:bg-[#7AB2D3] hover:bg-opacity-20 cursor-pointer transition-all"
+      onClick={onClick}
+    >
       <div className="mr-3">{icon}</div>
       <span className="text-lg">{label}</span>
     </div>

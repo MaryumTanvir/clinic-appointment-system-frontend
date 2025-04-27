@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Layout from '../../components/admin/Layout';
+import Layout from '../../components/doctor/Layout';
 
 const DoctorDashboard = () => {
   const [doctor, setDoctor] = useState(null);
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
+  const [feedbackCount, setFeedbackCount] = useState(0);
 
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
         const token = localStorage.getItem('token'); // Assuming you saved the JWT here during login
-        const response = await axios.get('http://localhost:5000/api/doctor/profile', {
+        const response = await axios.get('http://localhost:5000/api/doctors/profile', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -20,7 +22,37 @@ const DoctorDashboard = () => {
       }
     };
 
+    const fetchAppointments = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/doctors/appointments?filter=future', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setAppointmentsCount(response.data.count);
+      } catch (error) {
+        console.error('Failed to fetch appointments:', error);
+      }
+    };
+
+    const fetchFeedback = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/doctors/feedback', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setFeedbackCount(response.data.count);
+      } catch (error) {
+        console.error('Failed to fetch feedback:', error);
+      }
+    };
+
     fetchDoctor();
+    fetchAppointments();
+    fetchFeedback();
   }, []);
 
   return (
@@ -40,12 +72,12 @@ const DoctorDashboard = () => {
         <div className="flex">
           <div className="flex-1 border-r border-gray-400 px-4">
             <h3 className="text-xl font-semibold mb-2">Specialization</h3>
-            <p className="text-lg">{doctor?.specialization || '...'}</p>
+            <p className="text-lg">{doctor?.specialty || '...'}</p> {/* Corrected field */}
           </div>
 
           <div className="flex-1 border-r border-gray-400 px-8">
             <h3 className="text-xl font-semibold mb-2">Experience</h3>
-            <p className="text-lg">{doctor?.experience || '...'} years</p>
+            <p className="text-lg">{doctor?.credentials || '...'} years</p> {/* Corrected field */}
           </div>
 
           <div className="flex-1 px-6">
@@ -60,13 +92,13 @@ const DoctorDashboard = () => {
         {/* Appointments Card */}
         <div className="bg-[#B9E5E8] rounded-xl p-6">
           <h2 className="text-3xl font-bold mb-4">Appointments</h2>
-          <p className="text-2xl">You have 20 upcoming appointments</p>
+          <p className="text-2xl">You have {appointmentsCount} upcoming appointments</p>
         </div>
 
         {/* Feedback Card */}
         <div className="bg-[#B9E5E8] rounded-xl p-6">
           <h2 className="text-3xl font-bold mb-4">Feedback</h2>
-          <p className="text-2xl">You have 15 new feedback messages</p>
+          <p className="text-2xl">You have {feedbackCount} new feedback messages</p>
         </div>
       </div>
     </Layout>
