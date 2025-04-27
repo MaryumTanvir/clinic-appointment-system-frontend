@@ -4,13 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* Ensure full height for centering */
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
-/* Custom styles to replicate old CSS */
+/* Custom styles for Login and Signup pages */
 .form-container {
   display: flex;
   align-items: center;
@@ -21,7 +23,7 @@ html, body, #root {
 }
 
 .register-form {
-  padding: 24px; /* Increased from 5px for better aesthetics */
+  padding: 24px; /* Increased from 5px for aesthetics */
   border: solid 2px #091840; /* Accent color */
   width: 30%;
   background-color: white;
@@ -29,4 +31,26 @@ html, body, #root {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.logo { height: 100px; width: auto; }
+.logo {
+  height: 100px;
+  width: auto;
+}
+
+.form-grid .grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grid .ant-select-selector,
+.form-grid .ant-input,
+.form-grid .ant-input-password {
+  border-color: #091840 !important;
+  border-radius: 6px !important;
+}
+.form-grid .ant-select-selector:focus,
+.form-grid .ant-input:focus,
+.form-grid .ant-input-password:focus {
+  border-color: #091840 !important;
+  box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
+}
