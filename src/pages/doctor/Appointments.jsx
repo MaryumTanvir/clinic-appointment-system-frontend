@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, message } from 'antd';
+import { Table, Button, message, Modal, Input } from 'antd';
 import { ClipboardList } from 'lucide-react';
 import Layout from '../../components/doctor/Layout';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState('future'); // Default to 'future' for upcoming appointments
+  const [filter, setFilter] = useState('future');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -34,13 +37,17 @@ const Appointments = () => {
     fetchAppointments();
   }, [filter]);
 
-  const handleUpdateStatus = async (appointmentId, status) => {
+  const handleUpdateStatus = async (appointmentId, status, updatedNotes = null) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      const payload = { status };
+      if (updatedNotes) {
+        payload.notes = updatedNotes;
+      }
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/doctors/appointments/${appointmentId}/status`,
-        { status },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -48,40 +55,39 @@ const Appointments = () => {
         }
       );
 
-      // Update the appointment in the local state
       setAppointments((prev) =>
         prev.map((appt) =>
-          appt._id === appointmentId ? { ...appt, status, updatedAt: new Date() } : appt
+          appt._id === appointmentId
+            ? { ...appt, status, notes: updatedNotes || appt.notes, updatedAt: new Date() }
+            : appt
         )
       );
       message.success(`Appointment marked as ${status}`);
-
-      // If status is 'completed', update availability (future API)
-      /*
-      if (status === 'completed') {
-        try {
-          await axios.put(
-            `${import.meta.env.VITE_API_URL}/doctors/appointments/${appointmentId}/availability`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-          message.success('Availability updated');
-        } catch (error) {
-          console.error('Failed to update availability:', error);
-          message.error('Failed to update availability.');
-        }
-      }
-      */
     } catch (error) {
       console.error('Failed to update appointment status:', error);
       message.error(error.response?.data?.message || 'Failed to update appointment status.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const showNotesModal = (appointmentId, currentNotes) => {
+    setSelectedAppointmentId(appointmentId);
+    setNotes(currentNotes || '');
+    setIsModalVisible(true);
+  };
+
+  const handleModalOk = () => {
+    handleUpdateStatus(selectedAppointmentId, 'completed', notes);
+    setIsModalVisible(false);
+    setSelectedAppointmentId(null);
+    setNotes('');
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    setSelectedAppointmentId(null);
+    setNotes('');
   };
 
   const calculateAppointmentStatus = (appointment) => {
@@ -93,7 +99,7 @@ const Appointments = () => {
     if (appointment.status === 'completed') return 'Completed';
     if (appointment.status === 'cancelled') return 'Cancelled';
     if (now < apptDateTime) {
-      const timeLeft = Math.ceil((apptDateTime - now) / (1000 * 60)); // Time left in minutes
+      const timeLeft = Math.ceil((apptDateTime - now) / (1000 * 60));
       return `${timeLeft} min left`;
     }
     return 'Scheduled';
@@ -114,7 +120,7 @@ const Appointments = () => {
     {
       title: 'Phone',
       key: 'phone',
-      render: (_, record) => record.patientId?.contact?.phone || 'N/A'
+      render: (_, record) => record.contact?.phone || 'N/A'
     },
     {
       title: 'Date',
@@ -167,7 +173,7 @@ const Appointments = () => {
             <Button
               type="primary"
               size="small"
-              onClick={() => handleUpdateStatus(record._id, 'completed')}
+              onClick={() => showNotesModal(record._id, record.notes)}
               disabled={loading}
             >
               Complete
@@ -189,7 +195,6 @@ const Appointments = () => {
   return (
     <Layout>
       <div className="p-6 bg-[#B9E5E8] rounded-xl">
-        {/* Header */}
         <div className="flex items-center mb-6">
           <div className="flex items-center justify-center w-14 h-14 bg-white rounded-lg shadow-md">
             <ClipboardList size={28} className="text-[#4A628A]" />
@@ -199,7 +204,6 @@ const Appointments = () => {
           </h1>
         </div>
 
-        {/* Filter Buttons */}
         <div className="flex gap-4 mb-6">
           <Button
             type={filter === 'all' ? 'primary' : 'default'}
@@ -207,6 +211,7 @@ const Appointments = () => {
           >
             All
           </Button>
+          
           <Button
             type={filter === 'past' ? 'primary' : 'default'}
             onClick={() => setFilter('past')}
@@ -227,7 +232,6 @@ const Appointments = () => {
           </Button>
         </div>
 
-        {/* Appointments Table */}
         <Table
           dataSource={appointments}
           columns={columns}
@@ -237,6 +241,22 @@ const Appointments = () => {
           bordered
           className="ant-table-fixed"
         />
+
+        <Modal
+          title="Update Appointment Notes"
+          visible={isModalVisible}
+          onOk={handleModalOk}
+          onCancel={handleModalCancel}
+          okText="Save and Complete"
+          cancelText="Cancel"
+        >
+          <Input.TextArea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Enter or update appointment notes"
+            rows={4}
+          />
+        </Modal>
       </div>
     </Layout>
   );
