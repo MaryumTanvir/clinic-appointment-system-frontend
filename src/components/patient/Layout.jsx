@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Calendar, User, Settings, LogOut, Users, FileText, Wallet } from 'lucide-react';
+import { Home, Calendar, User, Settings, LogOut, Users, MessageSquare, FileText, Wallet } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import logo from '../../assets/images/logo.png';
@@ -19,12 +19,13 @@ const Layout = ({ children, role }) => {
     { icon: <Calendar size={20} />, label: 'Appointments', path: '/patient/appointments' },
     { icon: <Users size={20} />, label: 'Doctors', path: '/patient/doctors' },
     { icon: <Wallet size={20} />, label: 'Payments', path: '/patient/payments' },
+    { icon: <MessageSquare size={20} />, label: 'Feedback', path: '/patient/feedback' },
     { icon: <User size={20} />, label: 'Profile', path: '/patient/profile' },
     { icon: <Settings size={20} />, label: 'Settings', path: '/patient/settings' },
   ]
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-[#B9E5E8] to-[#7AB2D3]">
+    <div className="flex min-h-screen bg-gradient-to-br from-[#B9E5E8] to-[#7AB2D3]">
       {/* Sidebar */}
       <div className="w-80 bg-[#4A628A] text-white p-6 flex flex-col">
         {/* Logo */}
