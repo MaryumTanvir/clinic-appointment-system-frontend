@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, Calendar, Settings, LogOut, FileText } from 'lucide-react';
-
 import logo from '../../assets/images/logo.png';
 
 const Layout = ({ children }) => {
@@ -16,6 +15,13 @@ const Layout = ({ children }) => {
     { label: 'Shifts', icon: <Calendar size={20} />, path: '/admin/shifts' },
     { label: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
   ];
+  
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Clear the token
+    localStorage.removeItem('role'); // Clear the role if stored
+    navigate('/login'); // Redirect to login page
+  };
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-[#B9E5E8] to-[#7AB2D3]">
@@ -25,7 +31,7 @@ const Layout = ({ children }) => {
         {/* Logo */}
         <div className="flex items-center mb-12">
           <div className="w-12 h-12 rounded-full bg-white overflow-hidden mr-3">
-            <img src={logo} alt="Ikigai logo" className="w-full h-full object-cover" />
+            <img src={logo} alt="Ikigai logo" className="w-full h-full object-cover rounded-full" />
           </div>
           <h1 className="text-3xl font-bold pt-4">Ikigai</h1>
         </div>
@@ -44,15 +50,8 @@ const Layout = ({ children }) => {
         </nav>
 
         {/* Logout */}
-        <div className="mt-4">
-          <NavItem
-            icon={<LogOut size={20} />}
-            label="Logout"
-            onClick={() => {
-              localStorage.removeItem('token');
-              navigate('/login');
-            }}
-          />
+        <div onClick={handleLogout}>
+          <NavItem icon={<LogOut size={20} />} label="Logout" />
         </div>
       </div>
 

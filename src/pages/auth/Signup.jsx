@@ -38,7 +38,7 @@ function Signup() {
         role: values.role,
         profile,
       };
-      console.log('Sending payload:', payload);
+      console.log('Sending payload:', JSON.stringify(payload, null, 2));
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, payload);
       console.log('Signup response:', response.data);
@@ -77,11 +77,28 @@ function Signup() {
     }
   };
 
+  const phoneValidator = (_, value) => {
+    if (!value) return Promise.resolve();
+    const phoneRegex = /^\+?\d{0,4}[-.\s]?\(?\d{1,3}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/;
+    if (phoneRegex.test(value) && value.replace(/[^0-9]/g, '').length >= 7) {
+      return Promise.resolve();
+    }
+    return Promise.reject(new Error('Please enter a valid phone number (min 7 digits)'));
+  };
+
+  const textValidator = (fieldName) => (_, value) => {
+    if (!value) return Promise.resolve();
+    if (value.length >= 2 && /^[a-zA-Z0-9\s.-]+$/.test(value)) {
+      return Promise.resolve();
+    }
+    return Promise.reject(new Error(`${fieldName} must be at least 2 characters and contain valid characters`));
+  };
+
   return (
     <div className="form-container">
       <div className="register-form">
-        <div className="flex justify-center mb-6">
-          <img src={logo} alt="Clinic Appointment System" className="logo" />
+        <div className="logo">
+          <img src={logo} alt="Clinic Appointment System" className="logo-img" />
         </div>
         <h3 className="text-2xl font-bold text-accent text-center mb-6">Sign Up</h3>
         <Form
@@ -201,10 +218,11 @@ function Signup() {
             <Form.Item
               label={<span className="text-accent font-medium">Phone</span>}
               name="phone"
+              rules={[phoneValidator]}
             >
               <Input
                 className="border-accent focus:border-accent rounded-md"
-                placeholder="Enter your phone number"
+                placeholder="E.g., 123-456-7890"
               />
             </Form.Item>
           </div>
@@ -216,10 +234,12 @@ function Signup() {
                 rules={[
                   {
                     validator(_, value) {
-                      if (!value || (Number(value) >= 0)) {
+                      if (!value) return Promise.resolve();
+                      const num = Number(value);
+                      if (Number.isInteger(num) && num >= 0 && num <= 120) {
                         return Promise.resolve();
                       }
-                      return Promise.reject(new Error('Age must be a positive number'));
+                      return Promise.reject(new Error('Age must be an integer between 0 and 120'));
                     },
                   },
                 ]}
@@ -227,6 +247,8 @@ function Signup() {
                 <Input
                   type="number"
                   min="0"
+                  max="150"
+                  step="1"
                   onKeyDown={preventNegativeInput}
                   className="border-accent focus:border-accent rounded-md"
                   placeholder="Enter your age"
@@ -248,21 +270,36 @@ function Signup() {
               <Form.Item
                 label={<span className="text-accent font-medium">Specialty</span>}
                 name="specialty"
-                rules={[{ required: true, message: 'Please enter your specialty' }]}
+                rules={[{ required: true, message: 'Please select your specialty' }]}
               >
-                <Input
-                  className="border-accent focus:border-accent rounded-md"
-                  placeholder="E.g., Cardiology"
+                <Select
+                  className="border-accent"
+                  placeholder="Select your specialty"
+                  options={[
+                    { value: 'Cardiology', label: 'Cardiology' },
+                    { value: 'Neurology', label: 'Neurology' },
+                    { value: 'Pediatrics', label: 'Pediatrics' },
+                    { value: 'Orthopedics', label: 'Orthopedics' },
+                    { value: 'Dermatology', label: 'Dermatology' },
+                    { value: 'Oncology', label: 'Oncology' },
+                    { value: 'Gynecology', label: 'Gynecology' },
+                    { value: 'Psychiatry', label: 'Psychiatry' },
+                    { value: 'General Surgery', label: 'General Surgery' },
+                    { value: 'Endocrinology', label: 'Endocrinology' },
+                  ]}
                 />
               </Form.Item>
               <Form.Item
                 label={<span className="text-accent font-medium">Credentials</span>}
                 name="credentials"
-                rules={[{ required: true, message: 'Please enter your credentials' }]}
+                rules={[
+                  { required: true, message: 'Please enter your credentials' },
+                  textValidator('Credentials'),
+                ]}
               >
                 <Input
                   className="border-accent focus:border-accent rounded-md"
-                  placeholder="E.g., MD"
+                  placeholder="E.g., MD, MBBS"
                 />
               </Form.Item>
             </div>
@@ -272,6 +309,7 @@ function Signup() {
               <Form.Item
                 label={<span className="text-accent font-medium">Department</span>}
                 name="department"
+                rules={[textValidator('Department')]}
               >
                 <Input
                   className="border-accent focus:border-accent rounded-md"
@@ -281,6 +319,7 @@ function Signup() {
               <Form.Item
                 label={<span className="text-accent font-medium">Designation</span>}
                 name="designation"
+                rules={[textValidator('Designation')]}
               >
                 <Input
                   className="border-accent focus:border-accent rounded-md"

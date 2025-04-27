@@ -155,7 +155,7 @@ const ManageDoctors = () => {
         <p className="text-gray-600 mb-8">Welcome to the management system!</p>
 
         <div className="bg-[#E3F1F1] rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Manage Doctors</h2>
+         
 
           {/* Search */}
           <div className="relative mb-6">
@@ -199,14 +199,16 @@ const ManageDoctors = () => {
                     <td className="py-3 px-4 text-right">{doctor.profile?.consultationFee || '-'}</td>
                     <td className="py-3 px-4 flex justify-center gap-2">
                       <button
-                        className="bg-[#4A628A] text-white py-1 px-4 rounded hover:bg-[#3A5275] transition-colors"
+                        className=" text-white bg-[#4A628A]  py-1 px-4 rounded hover:bg-[#3A5275] transition-colors"
                         onClick={() => handleEditClick(doctor)}
+                        style={{ color: 'white'}}
                       >
                         Edit
                       </button>
                       <button
-                        className="bg-white text-[#FF6B6B] border border-[#FF6B6B] py-1 px-4 rounded hover:bg-[#FFEEEE] transition-colors"
+                        className="bg-none text-[#FF6B6B] border border-[#FF6B6B] py-1 px-4 rounded hover:bg-[#FFEEEE] transition-colors"
                         onClick={() => handleDeleteClick(doctor.user._id)}
+                        style={{ color: 'red'}}
                       >
                         Delete
                       </button>
@@ -224,6 +226,7 @@ const ManageDoctors = () => {
                 key={pageNumber}
                 onClick={() => handlePageChange(pageNumber)}
                 className={`mx-1 px-3 py-1 rounded ${currentPage === pageNumber ? 'bg-[#4A628A] text-white' : 'text-[#4A628A]'}`}
+                style={{ color: 'white'}}
               >
                 {pageNumber}
               </button>
@@ -250,33 +253,109 @@ const ManageDoctors = () => {
 
         {/* Edit Modal */}
         {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-[#4A628A]">Edit Doctor</h3>
-                <button
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <form onSubmit={handleEditFormSubmit}>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <input type="text" name="firstName" value={editFormData.firstName} onChange={handleEditFormChange} className="w-full px-3 py-2 border rounded" required placeholder="First Name" />
-                  <input type="text" name="lastName" value={editFormData.lastName} onChange={handleEditFormChange} className="w-full px-3 py-2 border rounded" required placeholder="Last Name" />
-                </div>
-                <input type="text" name="specialty" value={editFormData.specialty} onChange={handleEditFormChange} className="w-full px-3 py-2 border rounded mb-4" required placeholder="Specialty" />
-                <input type="text" name="credentials" value={editFormData.credentials} onChange={handleEditFormChange} className="w-full px-3 py-2 border rounded mb-4" required placeholder="Credentials" />
-                <input type="text" name="consultationFee" value={editFormData.consultationFee} onChange={handleEditFormChange} className="w-full px-3 py-2 border rounded mb-4" required placeholder="Consultation Fee" />
-                <div className="flex justify-end">
-                  <button type="button" onClick={() => setIsEditModalOpen(false)} className="mr-2 px-4 py-2 border rounded">Cancel</button>
-                  <button type="submit" className="ml-2 px-4 py-2 bg-[#4A628A] text-white rounded">Save</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+  <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-bold text-[#4A628A]">Edit Doctor</h3>
+        <button
+          onClick={() => setIsEditModalOpen(false)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <X size={24} />
+        </button>
+      </div>
+      <form onSubmit={handleEditFormSubmit} className="space-y-4">
+        
+        {/* First Name */}
+        <div>
+          <label className="block mb-1 text-gray-700">First Name</label>
+          <input
+            type="text"
+            name="firstName"
+            value={editFormData.firstName}
+            onChange={handleEditFormChange}
+            className="w-full px-4 py-2 border rounded"
+            required
+          />
+        </div>
+
+        {/* Last Name */}
+        <div>
+          <label className="block mb-1 text-gray-700">Last Name</label>
+          <input
+            type="text"
+            name="lastName"
+            value={editFormData.lastName}
+            onChange={handleEditFormChange}
+            className="w-full px-4 py-2 border rounded"
+            required
+          />
+        </div>
+
+        {/* Specialty */}
+        <div>
+          <label className="block mb-1 text-gray-700">Specialty</label>
+          <input
+            type="text"
+            name="specialty"
+            value={editFormData.specialty}
+            onChange={handleEditFormChange}
+            className="w-full px-4 py-2 border rounded"
+            required
+          />
+        </div>
+
+        {/* Credentials */}
+        <div>
+          <label className="block mb-1 text-gray-700">Credentials</label>
+          <input
+            type="text"
+            name="credentials"
+            value={editFormData.credentials}
+            onChange={handleEditFormChange}
+            className="w-full px-4 py-2 border rounded"
+            required
+          />
+        </div>
+
+        {/* Consultation Fee */}
+        <div>
+          <label className="block mb-1 text-gray-700">Consultation Fee</label>
+          <input
+            type="text"
+            name="consultationFee"
+            value={editFormData.consultationFee}
+            onChange={handleEditFormChange}
+            className="w-full px-4 py-2 border rounded"
+            required
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => setIsEditModalOpen(false)}
+            className="px-5 py-2 bg-[#FF6B6B] text-white rounded hover:bg-[#e74c3c]"
+            style={{ color: 'white', background:'red'}}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-5 py-2 bg-[#4A628A] text-white rounded hover:bg-[#3A5275]"
+            style={{ color: 'white'}}
+          >
+            Save
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+)}
+
+        
       </div>
     </Layout>
   );

@@ -140,6 +140,7 @@ const Settings = () => {
                 type="submit"
                 disabled={loading}
                 className="px-6 py-2 bg-[#4A628A] text-white rounded hover:bg-[#3A5275]"
+                style={{ color: 'white' }}
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>

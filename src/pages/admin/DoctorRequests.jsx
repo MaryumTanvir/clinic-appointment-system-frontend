@@ -74,7 +74,7 @@ const DoctorRequests = () => {
         <p className="text-gray-600 mb-8">welcome to the management system!</p>
 
         <div className="bg-[#E3F1F1] rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Manage Requests</h2>
+          
 
           {/* Search */}
           <div className="relative mb-6">
@@ -120,11 +120,13 @@ const DoctorRequests = () => {
                       <button
                         className="bg-green-500 text-white py-1 px-4 rounded hover:bg-green-600 transition-colors"
                         onClick={() => handleApprove(request._id)}
+                        style={{ color: 'white'}}
                       >
                         Approve
                       </button>
                       <button
-                        className="bg-white text-[#FF6B6B] border border-[#FF6B6B] py-1 px-4 rounded hover:bg-[#FFEEEE] transition-colors"
+                        className="bg-none text-[#FF6B6B] border border-[#FF6B6B] py-1 px-4 rounded hover:bg-[#FFEEEE] transition-colors"
+                        style={{ color: 'red'}}
                         onClick={() => handleReject(request._id)}
                       >
                         Reject
@@ -143,6 +145,7 @@ const DoctorRequests = () => {
                 key={pageNumber}
                 onClick={() => setCurrentPage(pageNumber)}
                 className={`mx-1 px-3 py-1 rounded ${currentPage === pageNumber ? 'bg-[#4A628A] text-white' : 'text-[#4A628A]'}`}
+                style={{ color: 'white'}}
               >
                 {pageNumber}
               </button>

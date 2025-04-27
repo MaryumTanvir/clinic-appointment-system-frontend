@@ -23,12 +23,12 @@ function Login() {
         message.success('Login successful!');
         // Redirect based on user role
         if (response.data.user.role === 'patient') {
-          navigate('/patient/appointments', { replace: true });
+          navigate('/', { replace: true });
         } else if(response.data.user.role === 'admin') {
           navigate('/admin/dashboard', { replace: true }); // Handle other roles later
         }
         else if(response.data.user.role === 'doctor') {
-            navigate('/', { replace: true }); // Handle other roles later
+            navigate('/doctor/dashboard', { replace: true }); // Handle other roles later
         }
         else{
             navigate('/', { replace: true });
@@ -47,8 +47,8 @@ function Login() {
   return (
     <div className="form-container">
       <div className="register-form">
-        <div className="flex justify-center mb-6">
-          <img src={logo} alt="Clinic Appointment System" className="logo" />
+        <div className="logo">
+          <img src={logo} alt="Clinic Appointment System" className="logo-img" />
         </div>
         <h3 className="text-2xl font-bold text-accent text-center mb-6">Login</h3>
         <Form
