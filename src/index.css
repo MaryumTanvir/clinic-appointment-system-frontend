@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-@import "tailwindcss";
-=======
 /* Import Ant Design styles */
 @import 'antd/dist/reset.css';
 @tailwind base;
@@ -33,4 +30,3 @@ html, body, #root {
 }
 
 .logo { height: 100px; width: auto; }
->>>>>>> 49411cccacc26cf6f3250ff8d9c8da008c12beb0
