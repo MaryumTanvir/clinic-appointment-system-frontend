@@ -19,6 +19,7 @@ import PatientProfile from '../pages/patient/Profile.jsx';
 import Feedback from '../pages/doctor/Feedback';
 import Shifts from '../pages/doctor/Shifts';
 import Profile from '../pages/doctor/Profile'; 
+import Appointments from '../pages/doctor/Appointments';
 import { useAuth } from '../hooks/useAuth';
 
 
@@ -66,6 +67,10 @@ function AppRoutes() {
       {/* 404 */}
       {/* Doctor Routes */}
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+      <Route path="/doctor/appointments" element={<Appointments />} />
+      <Route path="/doctor/feedback" element={<Feedback />} />
+      <Route path="/doctor/shifts" element={<Shifts />} />
+      <Route path="/doctor/profile" element={<Profile />} />
 
       {/* Patient Dashboard */}
       <Route path="/patient/dashboard" element={<PatientDashboard />} />
