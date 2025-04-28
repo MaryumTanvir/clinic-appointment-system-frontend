@@ -51,7 +51,7 @@ const Profile = () => {
 
     const isImage = file.type === 'image/jpeg' || file.type === 'image/png';
     if (!isImage) {
-      message.error('You can only upload JPG/PNG files!');
+      message.error('You can only upload JPEG/PNG files!');
       return;
     }
 

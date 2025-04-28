@@ -3,7 +3,10 @@ import axios from 'axios';
 import { Table, Button, message, Modal, DatePicker, Select, Form } from 'antd';
 import { Calendar } from 'lucide-react';
 import Layout from '../../components/patient/Layout';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const { Option } = Select;
 
@@ -14,6 +17,7 @@ const Appointments = () => {
   const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
+  const [availableDates, setAvailableDates] = useState([]); // Store doctor's available dates
   const [form] = Form.useForm();
 
   const fetchAppointments = async (timeFilter = '') => {
@@ -43,31 +47,49 @@ const Appointments = () => {
   const fetchDoctorAvailability = async (doctorId, selectedDate) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/patients/doctors/${doctorId}/profile`, {
+      const response = await axios.get(`http://localhost:5000/api/patients/doctors/${doctorId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       console.log('Doctor profile response:', response.data);
       if (response.data.success) {
-        const availability = response.data.data.availability || [];
+        const availability = response.data.data.profile?.availability || [];
+        console.log("Availability:", availability);
+        // Store unique available dates for DatePicker
+        const dates = [
+          ...new Set(
+            availability
+              .filter((slot) => slot.available)
+              .map((slot) => dayjs.utc(slot.date).format('YYYY-MM-DD'))
+          )
+        ];
+        setAvailableDates(dates);
+        console.log("Available dates:", dates);
         // Filter available times for the selected date
-        const selectedDateStr = moment(selectedDate).format('YYYY-MM-DD');
-        const times = availability
-          .filter((slot) => {
-            const slotDate = moment(slot.date).format('YYYY-MM-DD');
-            return slotDate === selectedDateStr && slot.available;
-          })
-          .map((slot) => slot.time);
-        setAvailableTimes(times);
+        if (selectedDate && dayjs.isDayjs(selectedDate)) {
+          const selectedDateStr = dayjs.utc(selectedDate).format('YYYY-MM-DD');
+          const times = availability
+            .filter((slot) => {
+              const slotDate = dayjs.utc(slot.date).format('YYYY-MM-DD');
+              return slotDate === selectedDateStr && slot.available;
+            })
+            .map((slot) => slot.time);
+          setAvailableTimes(times);
+          console.log("Available times:", times);
+        } else {
+          setAvailableTimes([]);
+        }
       } else {
         message.error(response.data.message || 'Failed to load doctor availability');
         setAvailableTimes([]);
+        setAvailableDates([]);
       }
     } catch (error) {
       console.error('Failed to fetch doctor availability:', error.response?.data || error);
       message.error(error.response?.data?.message || 'Failed to load doctor availability');
       setAvailableTimes([]);
+      setAvailableDates([]);
     }
   };
 
@@ -102,7 +124,7 @@ const Appointments = () => {
       const response = await axios.put(
         `http://localhost:5000/api/patients/appointments/${selectedAppointment._id}/reschedule`,
         {
-          date: values.date.format('YYYY-MM-DD'),
+          date: dayjs.utc(values.date).format('YYYY_party-MM-DD'),
           time: values.time,
           notes: values.notes
         },
@@ -127,11 +149,14 @@ const Appointments = () => {
     setSelectedAppointment(appointment);
     setRescheduleModalVisible(true);
     setAvailableTimes([]); // Reset times
+    setAvailableDates([]); // Reset dates
     form.setFieldsValue({
       date: null,
       time: null,
       notes: appointment.notes || ''
     });
+    // Fetch doctor's availability when modal opens
+    fetchDoctorAvailability(appointment.doctorId._id, null);
   };
 
   const handleDateChange = (date) => {
@@ -140,6 +165,19 @@ const Appointments = () => {
     } else {
       setAvailableTimes([]);
     }
+  };
+
+  // Disable dates not in doctor's availability
+  const disabledDate = (current) => {
+    if (!current || availableDates.length === 0) return true;
+
+    // Disable past dates
+    const today = dayjs.utc().startOf('day');
+    if (current < today) return true;
+
+    // Disable dates not in availableDates
+    const currentDateStr = dayjs.utc(current).format('YYYY-MM-DD');
+    return !availableDates.includes(currentDateStr);
   };
 
   const isCancelEligible = (appointment) => {
@@ -270,6 +308,7 @@ const Appointments = () => {
             setRescheduleModalVisible(false);
             form.resetFields();
             setAvailableTimes([]);
+            setAvailableDates([]);
           }}
           footer={null}
           className="reschedule-modal"
@@ -287,7 +326,7 @@ const Appointments = () => {
             >
               <DatePicker
                 format="YYYY-MM-DD"
-                disabledDate={(current) => current && current < moment().startOf('day')}
+                disabledDate={disabledDate}
                 onChange={handleDateChange}
                 className="w-full"
               />

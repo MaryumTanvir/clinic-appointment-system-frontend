@@ -52,7 +52,7 @@ function Signup() {
             login(response.data.user, response.data.token);
             message.success('Registration successful!');
             if (response.data.user.role === 'patient') {
-              navigate('/patient/appointments', { replace: true });
+              navigate('/patient/dashboard', { replace: true });
             } else {
               navigate('/', { replace: true });
             }

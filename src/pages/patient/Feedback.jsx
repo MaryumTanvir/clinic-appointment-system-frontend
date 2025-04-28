@@ -3,7 +3,10 @@ import axios from 'axios';
 import { Table, Button, message, Modal, Form, Rate, Input } from 'antd';
 import { MessageSquare } from 'lucide-react';
 import Layout from '../../components/patient/Layout';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const Feedback = () => {
   const [appointments, setAppointments] = useState([]);
@@ -23,7 +26,9 @@ const Feedback = () => {
       });
       console.log('Appointments response:', response.data);
       if (response.data.success) {
-        const appointmentsData = response.data.data;
+        const appointmentsData = response.data.data.filter(
+          (appointment) => (appointment.hasFeedback ?? false) === false
+        );
         setAppointments(appointmentsData);
       } else {
         message.error(response.data.message || 'Failed to load appointments');
@@ -93,7 +98,7 @@ const Feedback = () => {
       title: 'Appointment Date',
       dataIndex: 'date',
       key: 'date',
-      render: (date) => moment(date).format('YYYY-MM-DD')
+      render: (date) => dayjs.utc(date).format('YYYY-MM-DD')
     },
     {
       title: 'Time',
@@ -110,7 +115,7 @@ const Feedback = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) =>
-        record.status === 'completed' && !record.hasFeedback ? (
+        record.status === 'completed' && (record.hasFeedback ?? false) === false ? (
           <Button
             className="submit-feedback-button"
             onClick={() => showFeedbackModal(record)}
@@ -167,7 +172,7 @@ const Feedback = () => {
           >
             <p>
               Doctor: {selectedAppointment?.doctorId.firstName} {selectedAppointment?.doctorId.lastName}<br />
-              Date: {selectedAppointment && moment(selectedAppointment.date).format('YYYY-MM-DD')}<br />
+              Date: {selectedAppointment && dayjs.utc(selectedAppointment.date).format('YYYY-MM-DD')}<br />
               Time: {selectedAppointment?.time}
             </p>
           </Form.Item>

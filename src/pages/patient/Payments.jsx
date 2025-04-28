@@ -3,7 +3,10 @@ import axios from 'axios';
 import { Table, Select, Button, message, Modal, Form } from 'antd';
 import { DollarSign } from 'lucide-react';
 import Layout from '../../components/patient/Layout';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const { Option } = Select;
 
@@ -79,6 +82,11 @@ const Payments = () => {
 
   const handleMakePayment = async (values) => {
     try {
+      if (selectedPayment.appointmentId.status !== 'completed') {
+        message.error('Payment can only be made for completed appointments');
+        return;
+      }
+
       const token = localStorage.getItem('token');
       const payload = {
         appointmentIds: [selectedPayment.appointmentId._id],
@@ -117,7 +125,7 @@ const Payments = () => {
       title: 'Appointment Date',
       dataIndex: ['appointmentId', 'date'],
       key: 'date',
-      render: (date) => moment(date).format('YYYY-MM-DD')
+      render: (date) => dayjs.utc(date).format('YYYY-MM-DD')
     },
     {
       title: 'Time',
@@ -140,7 +148,7 @@ const Payments = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) =>
-        record.status === 'pending' ? (
+        record.status === 'pending' && record.appointmentId.status === 'completed' ? (
           <Button
             className="pay-now-button"
             onClick={() => showPaymentModal(record)}
@@ -201,7 +209,7 @@ const Payments = () => {
             Pay for Appointment
           </div>
         }
-        visible={isPaymentModalVisible}
+        open={isPaymentModalVisible}
         onCancel={handlePaymentModalCancel}
         footer={null}
         className="payment-modal"
@@ -216,7 +224,7 @@ const Payments = () => {
           >
             <p>
               Doctor: {selectedPayment?.doctorId.firstName} {selectedPayment?.doctorId.lastName}<br />
-              Date: {selectedPayment && moment(selectedPayment.appointmentId.date).format('YYYY-MM-DD')}<br />
+              Date: {selectedPayment && dayjs.utc(selectedPayment.appointmentId.date).format('YYYY-MM-DD')}<br />
               Time: {selectedPayment?.appointmentId.time}<br />
               Amount: PKR {selectedPayment?.amount}
             </p>

@@ -3,7 +3,10 @@ import axios from 'axios';
 import { Table, Select, Input, Button, message, Modal, Form, DatePicker } from 'antd';
 import { Users, Calendar } from 'lucide-react';
 import Layout from '../../components/patient/Layout';
-import moment from 'moment';
+import utc from 'dayjs/plugin/utc';
+import dayjs from 'dayjs';
+
+dayjs.extend(utc);
 
 const { Option } = Select;
 const { Search } = Input;
@@ -105,6 +108,7 @@ const Doctors = () => {
   };
 
   const showBookingModal = (doctor) => {
+    console.log('Selected Doctor:', doctor);
     setSelectedDoctor(doctor);
     setIsModalVisible(true);
     form.resetFields();
@@ -119,20 +123,44 @@ const Doctors = () => {
   };
 
   const handleDateChange = (date) => {
-    if (date && selectedDoctor) {
-      const selectedDate = moment(date).startOf('day');
-      const times = selectedDoctor.profile.availability
-        .filter((avail) => {
-          const availDate = moment(avail.date).startOf('day');
-          return availDate.isSame(selectedDate) && avail.available;
-        })
-        .map((avail) => avail.time)
-        .sort();
-      setAvailableTimes(times);
-      form.setFieldsValue({ time: undefined }); // Reset time when date changes
-    } else {
+    console.log('Raw Selected Date:', date);
+
+    if (!date || !dayjs.isDayjs(date)) {
+      console.log('Invalid or null date, resetting available times');
       setAvailableTimes([]);
+      return;
     }
+
+    // Format selected date in UTC
+    const formattedDate = dayjs.utc(date).format('YYYY-MM-DD');
+    console.log('Formatted Selected Date:', formattedDate);
+
+    const availableTimes = selectedDoctor?.profile?.availability?.filter((avail) => {
+      // Parse and format availability date in UTC
+      const availDate = dayjs.utc(avail.date).format('YYYY-MM-DD');
+      console.log('Checking avail date:', availDate, '===', formattedDate);
+      return availDate === formattedDate && avail.available;
+    }) || [];
+
+    console.log('Available Times:', availableTimes);
+    setAvailableTimes(availableTimes);
+  };
+
+  // Disable dates not in doctor's availability
+  const disabledDate = (current) => {
+    if (!selectedDoctor?.profile?.availability) return true;
+
+    // Get unique available dates in UTC
+    const availableDates = [
+      ...new Set(
+        selectedDoctor.profile.availability
+          .filter((avail) => avail.available)
+          .map((avail) => dayjs.utc(avail.date).format('YYYY-MM-DD'))
+      )
+    ];
+
+    // Disable if current date is not in availableDates
+    return !availableDates.includes(dayjs.utc(current).format('YYYY-MM-DD'));
   };
 
   const handleBookAppointment = async (values) => {
@@ -140,7 +168,7 @@ const Doctors = () => {
       const token = localStorage.getItem('token');
       const payload = {
         doctorId: selectedDoctor._id,
-        date: moment(values.date).format('YYYY-MM-DD'),
+        date: dayjs(values.date).utc().format('YYYY-MM-DD'),
         time: values.time,
         notes: values.notes || ''
       };
@@ -295,10 +323,9 @@ const Doctors = () => {
             rules={[{ required: true, message: 'Please select a date' }]}
           >
             <DatePicker
-              format="YYYY-MM-DD"
-              disabledDate={(current) => current && current < moment().startOf('day')}
               onChange={handleDateChange}
-              className="w-full"
+              format="YYYY-MM-DD"
+              disabledDate={disabledDate}
             />
           </Form.Item>
           <Form.Item
@@ -308,13 +335,11 @@ const Doctors = () => {
           >
             <Select
               placeholder="Select a time"
-              disabled={!availableTimes.length}
-              className="w-full"
-            >
-              {availableTimes.map((time) => (
-                <Option key={time} value={time}>{time}</Option>
-              ))}
-            </Select>
+              options={availableTimes.map((avail) => ({
+                value: avail.time,
+                label: avail.time,
+              }))}
+            />
           </Form.Item>
           <Form.Item
             label="Notes (Optional)"
