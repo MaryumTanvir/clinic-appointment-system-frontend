@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Select, Input, Button, message, Modal, Form, DatePicker } from 'antd';
-import { Users, Calendar } from 'lucide-react';
+import { Users, Calendar, Info } from 'lucide-react';
 import Layout from '../../components/patient/Layout';
 import utc from 'dayjs/plugin/utc';
 import dayjs from 'dayjs';
@@ -19,7 +19,9 @@ const Doctors = () => {
   const [specialtyFilter, setSpecialtyFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctorDetails, setSelectedDoctorDetails] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [form] = Form.useForm();
 
@@ -33,7 +35,7 @@ const Doctors = () => {
     { value: 'Gynecology', label: 'Gynecology' },
     { value: 'Psychiatry', label: 'Psychiatry' },
     { value: 'General Surgery', label: 'General Surgery' },
-    { value: 'Endocrinology', label: 'Endocrinology' }
+    { value: 'Endocrinology', label: 'Endocrinology' },
   ];
 
   const placeholderImage = 'https://placehold.co/40?text=Doc';
@@ -44,8 +46,8 @@ const Doctors = () => {
       const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:5000/api/patients/doctors', {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       console.log('Doctors response:', response.data);
       if (response.data.success) {
@@ -63,6 +65,30 @@ const Doctors = () => {
     }
   };
 
+  const fetchDoctorDetails = async (doctorId) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/patients/doctors/${doctorId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log('Doctor details response:', response.data);
+      if (response.data.success) {
+        setSelectedDoctorDetails(response.data.data);
+        setIsDetailsModalVisible(true);
+      } else {
+        message.error(response.data.message || 'Failed to load doctor details');
+      }
+    } catch (error) {
+      console.error('Failed to fetch doctor details:', error.response?.data || error);
+      message.error(error.response?.data?.message || 'Failed to load doctor details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDoctors();
   }, []);
@@ -70,22 +96,23 @@ const Doctors = () => {
   useEffect(() => {
     // Apply filters and search
     let result = doctors;
-    
+
     // Gender filter
     if (genderFilter) {
-      result = result.filter((doc) => 
+      result = result.filter((doc) =>
         doc.gender && doc.gender.toLowerCase() === genderFilter.toLowerCase()
       );
     }
-    
+
     // Specialty filter
     if (specialtyFilter) {
-      result = result.filter((doc) => 
-        doc.profile && doc.profile.specialty && 
+      result = result.filter((doc) =>
+        doc.profile &&
+        doc.profile.specialty &&
         doc.profile.specialty.toLowerCase() === specialtyFilter.toLowerCase()
       );
     }
-    
+
     // Search by name
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
@@ -95,7 +122,7 @@ const Doctors = () => {
           (doc.lastName && doc.lastName.toLowerCase().includes(lowerSearch))
       );
     }
-    
+
     console.log('Filtered doctors:', result);
     setFilteredDoctors(result);
   }, [genderFilter, specialtyFilter, searchTerm, doctors]);
@@ -115,6 +142,11 @@ const Doctors = () => {
     setAvailableTimes([]);
   };
 
+  const showDetailsModal = (doctor) => {
+    console.log('Viewing details for Doctor:', doctor);
+    fetchDoctorDetails(doctor._id);
+  };
+
   const handleModalCancel = () => {
     setIsModalVisible(false);
     setSelectedDoctor(null);
@@ -122,63 +154,67 @@ const Doctors = () => {
     form.resetFields();
   };
 
+  const handleDetailsModalCancel = () => {
+    setIsDetailsModalVisible(false);
+    setSelectedDoctorDetails(null);
+  };
+
   const handleDateChange = (date) => {
     console.log('Raw Selected Date:', date);
-
+  
     if (!date || !dayjs.isDayjs(date)) {
       console.log('Invalid or null date, resetting available times');
       setAvailableTimes([]);
       return;
     }
-
-    // Format selected date in UTC
-    const formattedDate = dayjs.utc(date).format('YYYY-MM-DD');
+  
+    // Format selected date in local time
+    const formattedDate = dayjs(date).format('YYYY-MM-DD');
     console.log('Formatted Selected Date:', formattedDate);
-
+  
     const availableTimes = selectedDoctor?.profile?.availability?.filter((avail) => {
-      // Parse and format availability date in UTC
-      const availDate = dayjs.utc(avail.date).format('YYYY-MM-DD');
+      const availDate = dayjs(avail.date).format('YYYY-MM-DD');
       console.log('Checking avail date:', availDate, '===', formattedDate);
       return availDate === formattedDate && avail.available;
     }) || [];
-
+  
     console.log('Available Times:', availableTimes);
     setAvailableTimes(availableTimes);
   };
+  
 
   // Disable dates not in doctor's availability
   const disabledDate = (current) => {
-    if (!selectedDoctor?.profile?.availability) return true;
+  if (!selectedDoctor?.profile?.availability) return true;
 
-    // Get unique available dates in UTC
-    const availableDates = [
-      ...new Set(
-        selectedDoctor.profile.availability
-          .filter((avail) => avail.available)
-          .map((avail) => dayjs.utc(avail.date).format('YYYY-MM-DD'))
-      )
-    ];
+  const availableDates = [
+    ...new Set(
+      selectedDoctor.profile.availability
+        .filter((avail) => avail.available)
+        .map((avail) => dayjs(avail.date).format('YYYY-MM-DD')) // Use local time
+    ),
+  ];
 
-    // Disable if current date is not in availableDates
-    return !availableDates.includes(dayjs.utc(current).format('YYYY-MM-DD'));
-  };
+  return !availableDates.includes(dayjs(current).format('YYYY-MM-DD')); // Also local time
+};
+
 
   const handleBookAppointment = async (values) => {
     try {
       const token = localStorage.getItem('token');
       const payload = {
         doctorId: selectedDoctor._id,
-        date: dayjs(values.date).utc().format('YYYY-MM-DD'),
+        date: dayjs(values.date).format('YYYY-MM-DD'),
         time: values.time,
-        notes: values.notes || ''
+        notes: values.notes || '',
       };
       const response = await axios.post(
         'http://localhost:5000/api/patients/appointments',
         payload,
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       console.log('Book appointment response:', response.data);
@@ -207,38 +243,48 @@ const Doctors = () => {
           onError={(e) => (e.target.src = placeholderImage)}
         />
       ),
-      width: 80
+      width: 80,
     },
     {
       title: 'Name',
       key: 'name',
-      render: (_, record) => `${record.firstName} ${record.lastName}`
+      render: (_, record) => `${record.firstName} ${record.lastName}`,
     },
     {
       title: 'Gender',
       dataIndex: 'gender',
       key: 'gender',
-      render: (gender) => gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'N/A'
+      render: (gender) => (gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'N/A'),
     },
     {
       title: 'Specialty',
       dataIndex: ['profile', 'specialty'],
       key: 'specialty',
-      render: (specialty) => specialty || 'N/A'
+      render: (specialty) => specialty || 'N/A',
     },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button
-          className="book-appointment-button"
-          onClick={() => showBookingModal(record)}
-        >
-          Book Appointment
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="book-appointment-button"
+            onClick={() => showBookingModal(record)}
+            data-testid="book-appointment-button"
+          >
+            Book Appointment
+          </Button>
+          <Button
+            className="view-details-button"
+            onClick={() => showDetailsModal(record)}
+            data-testid="view-details-button"
+          >
+            View Details
+          </Button>
+        </div>
       ),
-      width: 150
-    }
+      width: 250,
+    },
   ];
 
   return (
@@ -259,6 +305,7 @@ const Doctors = () => {
             onChange={(value) => setGenderFilter(value)}
             className="w-48"
             allowClear
+            data-testid="gender-filter"
           >
             <Option value="male">Male</Option>
             <Option value="female">Female</Option>
@@ -270,9 +317,12 @@ const Doctors = () => {
             onChange={(value) => setSpecialtyFilter(value)}
             className="w-48"
             allowClear
+            data-testid="specialty-filter"
           >
             {specialtyOptions.map((option) => (
-              <Option key={option.value} value={option.value}>{option.label}</Option>
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
             ))}
           </Select>
           <Search
@@ -281,10 +331,12 @@ const Doctors = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-48"
             allowClear
+            data-testid="search-input"
           />
           <Button
             onClick={handleResetFilters}
             className="bg-[#4A628A] text-white border-none"
+            data-testid="reset-filters-button"
           >
             Reset Filters
           </Button>
@@ -297,6 +349,7 @@ const Doctors = () => {
           loading={loading}
           pagination={{ pageSize: 10 }}
           className="bg-white rounded-lg"
+          data-testid="doctors-table"
         />
       </div>
 
@@ -307,10 +360,11 @@ const Doctors = () => {
             Book Appointment with {selectedDoctor?.firstName} {selectedDoctor?.lastName}
           </div>
         }
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={handleModalCancel}
         footer={null}
         className="booking-modal"
+        data-testid="booking-modal"
       >
         <Form
           form={form}
@@ -326,6 +380,7 @@ const Doctors = () => {
               onChange={handleDateChange}
               format="YYYY-MM-DD"
               disabledDate={disabledDate}
+              data-testid="date-picker"
             />
           </Form.Item>
           <Form.Item
@@ -339,24 +394,103 @@ const Doctors = () => {
                 value: avail.time,
                 label: avail.time,
               }))}
+              data-testid="time-select"
             />
           </Form.Item>
           <Form.Item
             label="Notes (Optional)"
             name="notes"
           >
-            <Input.TextArea rows={4} />
+            <Input.TextArea rows={4} data-testid="notes-textarea" />
           </Form.Item>
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               className="bg-[#4A628A] border-none"
+              data-testid="submit-booking-button"
             >
               Book Appointment
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={
+          <div className="flex items-center">
+            <Info size={24} className="mr-2 text-[#091840]" />
+            Doctor Details: {selectedDoctorDetails?.firstName} {selectedDoctorDetails?.lastName}
+          </div>
+        }
+        open={isDetailsModalVisible}
+        onCancel={handleDetailsModalCancel}
+        footer={[
+          <Button
+            key="book"
+            type="primary"
+            className="bg-[#4A628A] border-none"
+            onClick={() => {
+              handleDetailsModalCancel();
+              showBookingModal(selectedDoctorDetails);
+            }}
+            data-testid="book-from-details-button"
+          >
+            Book Appointment
+          </Button>,
+          <Button
+            key="close"
+            onClick={handleDetailsModalCancel}
+            data-testid="close-details-button"
+          >
+            Close
+          </Button>,
+        ]}
+        className="details-modal"
+        data-testid="details-modal"
+      >
+        {selectedDoctorDetails && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm mb-2">
+                <strong>Name:</strong> {selectedDoctorDetails.firstName}{' '}
+                {selectedDoctorDetails.lastName}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Email:</strong> {selectedDoctorDetails.email || 'N/A'}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Gender:</strong>{' '}
+                {selectedDoctorDetails.gender
+                  ? selectedDoctorDetails.gender.charAt(0).toUpperCase() +
+                    selectedDoctorDetails.gender.slice(1)
+                  : 'N/A'}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Specialty:</strong>{' '}
+                {selectedDoctorDetails.profile?.specialty || 'N/A'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm mb-2">
+                <strong>Credentials:</strong>{' '}
+                {selectedDoctorDetails.profile?.credentials || 'N/A'}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Consultation Fee:</strong> $
+                {selectedDoctorDetails.profile?.consultationFee || 'N/A'}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Phone:</strong>{' '}
+                {selectedDoctorDetails.profile?.contact?.phone || 'N/A'}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Location:</strong>{' '}
+                {selectedDoctorDetails.profile?.contact?.location || 'N/A'}
+              </p>
+            </div>
+          </div>
+        )}
       </Modal>
     </Layout>
   );

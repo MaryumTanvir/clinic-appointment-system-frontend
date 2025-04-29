@@ -120,6 +120,7 @@ function Signup() {
               <Input
                 className="border-accent focus:border-accent rounded-md"
                 placeholder="Enter your first name"
+                data-testid="first-name-input"
               />
             </Form.Item>
             <Form.Item
@@ -130,6 +131,7 @@ function Signup() {
               <Input
                 className="border-accent focus:border-accent rounded-md"
                 placeholder="Enter your last name"
+                data-testid="last-name-input"
               />
             </Form.Item>
           </div>
@@ -142,6 +144,7 @@ function Signup() {
               <Select
                 className="border-accent"
                 placeholder="Select your gender"
+                data-testid="gender-select"
                 options={[
                   { value: 'male', label: 'Male' },
                   { value: 'female', label: 'Female' },
@@ -157,6 +160,7 @@ function Signup() {
               <Select
                 className="border-accent"
                 placeholder="Select your role"
+                data-testid="role-select"
                 options={[
                   { value: 'patient', label: 'Patient' },
                   { value: 'doctor', label: 'Doctor' },
@@ -177,6 +181,7 @@ function Signup() {
               <Input
                 className="border-accent focus:border-accent rounded-md"
                 placeholder="Enter your email"
+                data-testid="email-input"
               />
             </Form.Item>
             <Form.Item
@@ -190,6 +195,7 @@ function Signup() {
               <Input.Password
                 className="border-accent focus:border-accent rounded-md"
                 placeholder="Enter your password"
+                data-testid="password-input"
               />
             </Form.Item>
           </div>
@@ -213,6 +219,7 @@ function Signup() {
               <Input.Password
                 className="border-accent focus:border-accent rounded-md"
                 placeholder="Confirm your password"
+                data-testid="confirm-password-input"
               />
             </Form.Item>
             <Form.Item
@@ -223,6 +230,7 @@ function Signup() {
               <Input
                 className="border-accent focus:border-accent rounded-md"
                 placeholder="E.g., 123-456-7890"
+                data-testid="phone-input"
               />
             </Form.Item>
           </div>
@@ -252,6 +260,7 @@ function Signup() {
                   onKeyDown={preventNegativeInput}
                   className="border-accent focus:border-accent rounded-md"
                   placeholder="Enter your age"
+                  data-testid="age-input"
                 />
               </Form.Item>
               <Form.Item
@@ -261,6 +270,7 @@ function Signup() {
                 <Input
                   className="border-accent focus:border-accent rounded-md"
                   placeholder="E.g., asthma, diabetes"
+                  data-testid="medical-history-input"
                 />
               </Form.Item>
             </div>
@@ -275,6 +285,7 @@ function Signup() {
                 <Select
                   className="border-accent"
                   placeholder="Select your specialty"
+                  data-testid="specialty-select"
                   options={[
                     { value: 'Cardiology', label: 'Cardiology' },
                     { value: 'Neurology', label: 'Neurology' },
@@ -300,6 +311,7 @@ function Signup() {
                 <Input
                   className="border-accent focus:border-accent rounded-md"
                   placeholder="E.g., MD, MBBS"
+                  data-testid="credentials-input"
                 />
               </Form.Item>
             </div>
@@ -314,6 +326,7 @@ function Signup() {
                 <Input
                   className="border-accent focus:border-accent rounded-md"
                   placeholder="E.g., HR"
+                  data-testid="department-input"
                 />
               </Form.Item>
               <Form.Item
@@ -324,6 +337,7 @@ function Signup() {
                 <Input
                   className="border-accent focus:border-accent rounded-md"
                   placeholder="E.g., Manager"
+                  data-testid="designation-input"
                 />
               </Form.Item>
             </div>
@@ -334,12 +348,13 @@ function Signup() {
               htmlType="submit"
               loading={loading}
               className="w-full bg-primary hover:bg-primary-dark text-white border-none h-10 rounded-md"
+              data-testid="submit-button"
             >
               Sign Up
             </Button>
           </Form.Item>
           <div className="text-center">
-            <Link to="/login" className="text-accent hover:underline text-sm">
+            <Link to="/login" className="text-accent hover:underline text-sm" data-testid="login-link">
               Already have an account? Login here
             </Link>
           </div>

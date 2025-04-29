@@ -13,11 +13,11 @@ const { Option } = Select;
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState(''); // '' for all, 'past', 'today', 'future'
+  const [filter, setFilter] = useState('');
   const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
-  const [availableDates, setAvailableDates] = useState([]); // Store doctor's available dates
+  const [availableDates, setAvailableDates] = useState([]);
   const [form] = Form.useForm();
 
   const fetchAppointments = async (timeFilter = '') => {
@@ -25,10 +25,8 @@ const Appointments = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:5000/api/patients/appointments', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: { time: timeFilter }
+        headers: { Authorization: `Bearer ${token}` },
+        params: { time: timeFilter },
       });
       console.log('Appointments response:', response.data);
       if (response.data.success) {
@@ -48,35 +46,31 @@ const Appointments = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`http://localhost:5000/api/patients/doctors/${doctorId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Doctor profile response:', response.data);
       if (response.data.success) {
         const availability = response.data.data.profile?.availability || [];
-        console.log("Availability:", availability);
-        // Store unique available dates for DatePicker
+        console.log('Availability:', availability);
         const dates = [
           ...new Set(
             availability
               .filter((slot) => slot.available)
-              .map((slot) => dayjs.utc(slot.date).format('YYYY-MM-DD'))
-          )
+              .map((slot) => dayjs(slot.date).format('YYYY-MM-DD')) // Local time for display
+          ),
         ];
         setAvailableDates(dates);
-        console.log("Available dates:", dates);
-        // Filter available times for the selected date
+        console.log('Available dates:', dates);
         if (selectedDate && dayjs.isDayjs(selectedDate)) {
-          const selectedDateStr = dayjs.utc(selectedDate).format('YYYY-MM-DD');
+          const selectedDateStr = dayjs(selectedDate).format('YYYY-MM-DD'); // Local time
           const times = availability
             .filter((slot) => {
-              const slotDate = dayjs.utc(slot.date).format('YYYY-MM-DD');
+              const slotDate = dayjs(slot.date).format('YYYY-MM-DD'); // Local time
               return slotDate === selectedDateStr && slot.available;
             })
             .map((slot) => slot.time);
           setAvailableTimes(times);
-          console.log("Available times:", times);
+          console.log('Available times:', times);
         } else {
           setAvailableTimes([]);
         }
@@ -108,7 +102,7 @@ const Appointments = () => {
       console.log('Cancel response:', response.data);
       if (response.data.success) {
         message.success(response.data.message);
-        fetchAppointments(filter); // Refresh appointments
+        fetchAppointments(filter);
       } else {
         message.error(response.data.message || 'Failed to cancel appointment');
       }
@@ -120,27 +114,49 @@ const Appointments = () => {
 
   const handleRescheduleAppointment = async (values) => {
     try {
+      console.log('Reschedule form values:', values);
       const token = localStorage.getItem('token');
+      const incrementedDate = dayjs(values.date).add(1, 'day'); // Add one day
+
+      const payload = {
+        date: incrementedDate.utc().format('YYYY-MM-DD'), // Send as UTC
+        time: values.time,
+        notes: values.notes,
+      };
+      console.log('Reschedule payload:', {
+        appointmentId: selectedAppointment._id,
+        payload,
+        utcDate: payload.date,
+        localDate: dayjs(values.date).format('YYYY-MM-DD HH:mm:ss Z'),
+      });
       const response = await axios.put(
         `http://localhost:5000/api/patients/appointments/${selectedAppointment._id}/reschedule`,
-        {
-          date: dayjs.utc(values.date).format('YYYY_party-MM-DD'),
-          time: values.time,
-          notes: values.notes
-        },
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('Reschedule response:', response.data);
+      console.log('Reschedule response:', {
+        status: response.status,
+        data: response.data,
+      });
       if (response.data.success) {
         message.success(response.data.message);
         setRescheduleModalVisible(false);
         form.resetFields();
-        fetchAppointments(filter); // Refresh appointments
+        fetchAppointments(filter);
       } else {
+        console.error('Reschedule failed:', response.data);
         message.error(response.data.message || 'Failed to reschedule appointment');
       }
     } catch (error) {
-      console.error('Reschedule appointment error:', error.response?.data || error);
+      console.error('Reschedule appointment error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        request: {
+          url: error.config?.url,
+          data: error.config?.data,
+        },
+      });
       message.error(error.response?.data?.message || 'Failed to reschedule appointment');
     }
   };
@@ -148,14 +164,13 @@ const Appointments = () => {
   const openRescheduleModal = (appointment) => {
     setSelectedAppointment(appointment);
     setRescheduleModalVisible(true);
-    setAvailableTimes([]); // Reset times
-    setAvailableDates([]); // Reset dates
+    setAvailableTimes([]);
+    setAvailableDates([]);
     form.setFieldsValue({
       date: null,
       time: null,
-      notes: appointment.notes || ''
+      notes: appointment.notes || '',
     });
-    // Fetch doctor's availability when modal opens
     fetchDoctorAvailability(appointment.doctorId._id, null);
   };
 
@@ -167,25 +182,19 @@ const Appointments = () => {
     }
   };
 
-  // Disable dates not in doctor's availability
   const disabledDate = (current) => {
     if (!current || availableDates.length === 0) return true;
-
-    // Disable past dates
-    const today = dayjs.utc().startOf('day');
+    const today = dayjs().startOf('day'); // Local time
     if (current < today) return true;
-
-    // Disable dates not in availableDates
-    const currentDateStr = dayjs.utc(current).format('YYYY-MM-DD');
+    const currentDateStr = dayjs(current).format('YYYY-MM-DD'); // Local time
     return !availableDates.includes(currentDateStr);
   };
 
   const isCancelEligible = (appointment) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = dayjs().startOf('day').toDate(); // Local time
     return (
       ['scheduled', 'rescheduled'].includes(appointment.status) &&
-      new Date(appointment.date) >= today
+      dayjs(appointment.date).startOf('day').toDate() >= today
     );
   };
 
@@ -198,42 +207,43 @@ const Appointments = () => {
       title: 'Doctor',
       dataIndex: 'doctorId',
       key: 'doctor',
-      render: (doctor) => `${doctor.firstName} ${doctor.lastName}`
+      render: (doctor) => `${doctor.firstName} ${doctor.lastName}`,
     },
     {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      render: (date) => new Date(date).toISOString().split('T')[0]
+      render: (date) => dayjs(date).format('YYYY-MM-DD'), // Local time
     },
     {
       title: 'Time',
       dataIndex: 'time',
-      key: 'time'
+      key: 'time',
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => status.charAt(0).toUpperCase() + status.slice(1)
+      render: (status) => status.charAt(0).toUpperCase() + status.slice(1),
     },
     {
       title: 'Notes',
       dataIndex: 'notes',
       key: 'notes',
-      render: (notes) => notes || 'No notes'
+      render: (notes) => notes || 'No notes',
     },
     {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-testid={`appointment-row-${record._id}`}>
           <Button
             type="primary"
             danger
             onClick={() => handleCancelAppointment(record._id)}
             disabled={!isCancelEligible(record)}
             className="bg-red-600 disabled:bg-gray-300"
+            data-testid="cancel-button"
           >
             Cancel
           </Button>
@@ -242,12 +252,13 @@ const Appointments = () => {
             onClick={() => openRescheduleModal(record)}
             disabled={!isRescheduleEligible(record)}
             className="bg-[#4A628A] disabled:bg-gray-300"
+            data-testid="reschedule-button"
           >
             Reschedule
           </Button>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -266,6 +277,7 @@ const Appointments = () => {
             type={filter === '' ? 'primary' : 'default'}
             onClick={() => setFilter('')}
             className={filter === '' ? 'bg-[#4A628A] text-white border-none' : ''}
+            data-testid="filter-all-button"
           >
             All
           </Button>
@@ -273,6 +285,7 @@ const Appointments = () => {
             type={filter === 'past' ? 'primary' : 'default'}
             onClick={() => setFilter('past')}
             className={filter === 'past' ? 'bg-[#4A628A] text-white border-none' : ''}
+            data-testid="filter-past-button"
           >
             Past
           </Button>
@@ -280,6 +293,7 @@ const Appointments = () => {
             type={filter === 'today' ? 'primary' : 'default'}
             onClick={() => setFilter('today')}
             className={filter === 'today' ? 'bg-[#4A628A] text-white border-none' : ''}
+            data-testid="filter-today-button"
           >
             Today
           </Button>
@@ -287,6 +301,7 @@ const Appointments = () => {
             type={filter === 'future' ? 'primary' : 'default'}
             onClick={() => setFilter('future')}
             className={filter === 'future' ? 'bg-[#4A628A] text-white border-none' : ''}
+            data-testid="filter-future-button"
           >
             Future
           </Button>
@@ -299,11 +314,12 @@ const Appointments = () => {
           loading={loading}
           pagination={{ pageSize: 10 }}
           className="bg-white rounded-lg"
+          data-testid="appointments-table"
         />
 
         <Modal
           title="Reschedule Appointment"
-          visible={rescheduleModalVisible}
+          open={rescheduleModalVisible}
           onCancel={() => {
             setRescheduleModalVisible(false);
             form.resetFields();
@@ -312,6 +328,7 @@ const Appointments = () => {
           }}
           footer={null}
           className="reschedule-modal"
+          data-testid="reschedule-modal"
         >
           <Form
             form={form}
@@ -329,6 +346,7 @@ const Appointments = () => {
                 disabledDate={disabledDate}
                 onChange={handleDateChange}
                 className="w-full"
+                data-testid="date-picker"
               />
             </Form.Item>
             <Form.Item
@@ -341,9 +359,12 @@ const Appointments = () => {
                 className="w-full"
                 disabled={availableTimes.length === 0}
                 notFoundContent={availableTimes.length === 0 ? 'No available times for selected date' : null}
+                data-testid="time-select"
               >
                 {availableTimes.map((time) => (
-                  <Option key={time} value={time}>{time}</Option>
+                  <Option key={time} value={time} data-testid={`time-option-${time}`}>
+                    {time}
+                  </Option>
                 ))}
               </Select>
             </Form.Item>
@@ -351,10 +372,19 @@ const Appointments = () => {
               name="notes"
               label="Notes (Optional)"
             >
-              <textarea className="w-full p-2 border border-[#091840] rounded" rows={4} />
+              <textarea
+                className="w-full p-2 border border-[#091840] rounded"
+                rows={4}
+                data-testid="notes-textarea"
+              />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" className="bg-[#4A628A] w-full">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-[#4A628A] w-full"
+                data-testid="submit-reschedule-button"
+              >
                 Reschedule
               </Button>
             </Form.Item>

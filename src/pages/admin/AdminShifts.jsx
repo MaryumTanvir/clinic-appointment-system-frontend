@@ -315,6 +315,7 @@ const AdminShifts = () => {
                 Cancel
               </button>
               <button
+                data-testid="Assign-btn"
                 type='submit'
                 className=' px-4 py-2 bg-[#4A628A] text-white rounded'
                 style={{ color: 'white', margin: '2px' }}

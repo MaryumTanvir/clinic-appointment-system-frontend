@@ -203,6 +203,7 @@ const Payments = () => {
       </div>
 
       <Modal
+        data-testid="payment-modal"
         title={
           <div className="flex items-center">
             <DollarSign size={24} className="mr-2 text-[#091840]" />
@@ -235,6 +236,8 @@ const Payments = () => {
             rules={[{ required: true, message: 'Please select a payment method' }]}
           >
             <Select
+              id="method"
+              aria-label="payment method"
               placeholder="Select a payment method"
               className="w-full"
             >

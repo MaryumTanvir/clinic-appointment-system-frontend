@@ -13,7 +13,7 @@ function Login() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      const response = await axios.post(`http://localhost:5000/api/auth/login`, {
         email: values.email,
         password: values.password,
       });
@@ -57,6 +57,7 @@ function Login() {
           className="space-y-4"
         >
           <Form.Item
+            data-testid="email-input"
             label={<span className="text-accent font-medium">Email</span>}
             name="email"
             rules={[
@@ -70,6 +71,7 @@ function Login() {
             />
           </Form.Item>
           <Form.Item
+            data-testid="password-input"
             label={<span className="text-accent font-medium">Password</span>}
             name="password"
             rules={[{ required: true, message: 'Please enter your password' }]}
@@ -79,7 +81,9 @@ function Login() {
               placeholder="Enter your password"
             />
           </Form.Item>
-          <Form.Item>
+          <Form.Item
+          data-testid="login-button"
+          >
             <Button
               type="primary"
               htmlType="submit"

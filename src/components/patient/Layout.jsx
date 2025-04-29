@@ -21,7 +21,6 @@ const Layout = ({ children, role }) => {
     { icon: <Wallet size={20} />, label: 'Payments', path: '/patient/payments' },
     { icon: <MessageSquare size={20} />, label: 'Feedback', path: '/patient/feedback' },
     { icon: <User size={20} />, label: 'Profile', path: '/patient/profile' },
-    { icon: <Settings size={20} />, label: 'Settings', path: '/patient/settings' },
   ]
 
   return (
