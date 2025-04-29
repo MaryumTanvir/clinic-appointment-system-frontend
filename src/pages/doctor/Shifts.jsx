@@ -43,8 +43,11 @@ const Shifts = () => {
     shiftEnd.setHours(endHour, endMinute, 0, 0);
 
     if (now < shiftStart) {
-      const timeLeft = Math.ceil((shiftStart - now) / (1000 * 60)); // Time left in minutes
-      return `${timeLeft} min left`;
+      const timeLeft = shiftStart - now;
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      return `${days > 0 ? `${days}d ` : ''}${hours > 0 ? `${hours}h ` : ''}${minutes}m left`;
     } else if (now >= shiftStart && now <= shiftEnd) {
       return 'Active';
     } else {

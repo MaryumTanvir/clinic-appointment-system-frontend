@@ -99,8 +99,11 @@ const Appointments = () => {
     if (appointment.status === 'completed') return 'Completed';
     if (appointment.status === 'cancelled') return 'Cancelled';
     if (now < apptDateTime) {
-      const timeLeft = Math.ceil((apptDateTime - now) / (1000 * 60));
-      return `${timeLeft} min left`;
+      const timeLeft = apptDateTime - now;
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      return `${days > 0 ? `${days}d ` : ''}${hours > 0 ? `${hours}h ` : ''}${minutes}m left`;
     }
     return 'Scheduled';
   };
