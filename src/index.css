@@ -1,1 +1,227 @@
+/* Import Ant Design styles */
+@import 'antd/dist/reset.css';
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Ensure full height for centering */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom styles for Login and Signup pages */
+.form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  background-color: #a4d6ed; /* Main color */
+}
+
+.register-form {
+  padding: 24px; /* Increased from 5px for aesthetics */
+  border: solid 2px #091840; /* Accent color */
+  width: 30%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logo{
+  display: flex;
+  justify-content: center;
+}
+
+.logo-img {
+  height: 100px;
+  width: auto;
+}
+
+.form-grid .grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grid .ant-select-selector,
+.form-grid .ant-input,
+.form-grid .ant-input-password {
+  border-color: #091840 !important;
+  border-radius: 6px !important;
+}
+.form-grid .ant-select-selector:focus,
+.form-grid .ant-input:focus,
+.form-grid .ant-input-password:focus {
+  border-color: #091840 !important;
+  box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
+}
+
+/* Style Ant Design Table */
+.ant-table {
+  background: #fff !important;
+  border-radius: 8px !important;
+}
+.ant-table-thead > tr > th {
+  background: #f0f8ff !important;
+  color: #091840 !important;
+  font-weight: 600 !important;
+}
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+/* Style Reschedule Modal */
+.reschedule-modal .ant-modal-content {
+  background-color: #a4d6ed;
+  border: 2px solid #091840;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.reschedule-modal .ant-modal-header {
+  background-color: #a4d6ed;
+  border-bottom: none;
+}
+.reschedule-modal .ant-modal-title {
+  color: #091840;
+  font-weight: 600;
+}
+.reschedule-modal .ant-form-item-label > label {
+  color: #091840;
+}
+.reschedule-modal .ant-picker,
+.reschedule-modal .ant-select-selector {
+  border-color: #091840 !important;
+  border-radius: 6px !important;
+}
+.reschedule-modal .ant-picker-focused,
+.reschedule-modal .ant-select-focused .ant-select-selector {
+  border-color: #091840 !important;
+  box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
+}
+
+/* Style Doctor Profile Image */
+.doctor-profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #091840;
+}
+
+
+/* Style Patient Profile Image */
+.profile-image {
+  border: 2px solid #091840 !important;
+  border-radius: 50% !important;
+}
+
+
+/* Style Book Appointment Button */
+.book-appointment-button {
+  background-color: #4A628A !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+.book-appointment-button:hover {
+  background-color: #5a7aa8 !important;
+}
+
+/* Style Pay Now Button */
+.pay-now-button {
+  background-color: #4A628A !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+.pay-now-button:hover {
+  background-color: #5a7aa8 !important;
+}
+
+/* Style Submit Feedback Button */
+.submit-feedback-button {
+  background-color: #4A628A !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+.submit-feedback-button:hover {
+  background-color: #5a7aa8 !important;
+}
+
+
+/* Style Filter/Search Inputs */
+.ant-select-selector,
+.ant-input {
+  border-color: #091840 !important;
+  border-radius: 6px !important;
+}
+.ant-select-selector:focus,
+.ant-input:focus {
+  border-color: #091840 !important;
+  box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
+}
+.ant-select-clear,
+.ant-input-clear-icon {
+  color: #091840 !important;
+}
+
+/* Style Payment Modal */
+.payment-modal .ant-modal-content {
+  background-color: #a4d6ed;
+  border: 2px solid #091840;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.payment-modal .ant-modal-header {
+  background-color: #a4d6ed;
+  border-bottom: none;
+}
+.payment-modal .ant-modal-title {
+  color: #091840;
+  font-weight: 600;
+}
+.payment-modal .ant-form-item-label > label {
+  color: #091840;
+}
+.payment-modal .ant-select-selector {
+  border-color: #091840 !important;
+  border-radius: 6px !important;
+}
+.payment-modal .ant-select-focused .ant-select-selector {
+  border-color: #091840 !important;
+  box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
+}
+
+/* Style Feedback Modal */
+.feedback-modal .ant-modal-content {
+  background-color: #a4d6ed;
+  border: 2px solid #091840;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.feedback-modal .ant-modal-header {
+  background-color: #a4d6ed;
+  border-bottom: none;
+}
+.feedback-modal .ant-modal-title {
+  color: #091840;
+  font-weight: 600;
+}
+.feedback-modal .ant-form-item-label > label {
+  color: #091840;
+}
+.feedback-modal .ant-rate,
+.feedback-modal .ant-input {
+  border-color: #091840 !important;
+  border-radius: 6px !important;
+}
+.feedback-modal .ant-input:focus {
+  border-color: #091840 !important;
+  box-shadow: 0 0 0 2px rgba(9, 24, 64, 0.2) !important;
+}
